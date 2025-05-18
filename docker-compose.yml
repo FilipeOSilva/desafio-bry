@@ -1,0 +1,12 @@
+services:
+  sign-server:
+    build: .
+    container_name: signServer
+    volumes:
+      - ./signatures:/app/docs
+    ports:
+      - "8080:8080"
+    restart: always
+
+volumes:
+  sign-server:
