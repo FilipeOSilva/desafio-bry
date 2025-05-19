@@ -21,13 +21,12 @@ private:
     size_t getDocSize() const;
     const unsigned char* getDoc() const;
     void handleErrors(const std::string& msg);
-    void decodeBase64(const std::string& b64_input);
     void verify();
     void setStatusCert(bool status);
     void getCMSInfo();
 
 public:
-    DocSignInfo(const std::string& base64_input);
+    explicit DocSignInfo(const std::string& input);
     std::string getSigningTime();
     std::string getEncapContentInfoHEXA();
     std::string getDigestAlgorithm();

@@ -32,23 +32,6 @@ std::string DocSignInfo::sha512(const std::string& input) {
     return s512.str();
 }
 
-void DocSignInfo::decodeBase64(const std::string& b64_input) {
-    BIO* bio = BIO_new_mem_buf(b64_input.data(), b64_input.length());
-    BIO* b64 = BIO_new(BIO_f_base64());
-    bio = BIO_push(b64, bio);
-    BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
-
-    doc.resize(b64_input.length());
-    int len = BIO_read(bio, doc.data(), doc.size());
-    if (len <= 0) {
-        BIO_free_all(bio);
-        throw std::runtime_error("Error decode base64!");
-    }
-
-    doc.resize(len);
-    BIO_free_all(bio);
-}
-
 const unsigned char* DocSignInfo::getDoc() const {
     return reinterpret_cast<const unsigned char*>(doc.data());
 }
@@ -147,8 +130,8 @@ void DocSignInfo::getCMSInfo() {
 
     X509_NAME* subj = X509_get_subject_name(signerCert);
     char cn[256];
-    int len = X509_NAME_get_text_by_NID(subj, NID_commonName, cn, sizeof(cn));
-    CN = (len >= 0) ? std::string(cn, len) : "";
+    int len_x509 = X509_NAME_get_text_by_NID(subj, NID_commonName, cn, sizeof(cn));
+    CN = (len_x509 >= 0) ? std::string(cn, len_x509) : "";
 
     int attrCount = CMS_signed_get_attr_count(si);
     ASN1_OBJECT* signingTimeOid = OBJ_nid2obj(NID_pkcs9_signingTime);
@@ -162,15 +145,15 @@ void DocSignInfo::getCMSInfo() {
 
         if (OBJ_cmp(obj, signingTimeOid) == 0) {
             ASN1_TYPE* val = X509_ATTRIBUTE_get0_type(attr, 0);
-            if (val || val->type == V_ASN1_UTCTIME) {
+            if (val && val->type == V_ASN1_UTCTIME) {
                 ASN1_UTCTIME* utc = val->value.utctime;
                 char buffer[32];
                 ASN1_TIME_to_tm(utc, nullptr);
 
-                int len = utc->length;
-                memcpy(buffer, utc->data, len);
-                buffer[len] = '\0';
-                signingTime = (len >= 0) ? std::string(buffer, len) : "";
+                int len_utc = utc->length;
+                memcpy(buffer, utc->data, len_utc);
+                buffer[len_utc] = '\0';
+                signingTime = (len_utc >= 0) ? std::string(buffer, len_utc) : "";
             }
         }
     }
@@ -189,7 +172,7 @@ void DocSignInfo::getCMSInfo() {
 
 void DocSignInfo::getSignFile() {
 
-    std::string nameFile = sha512(doc.c_str());
+    std::string nameFile = sha512(doc);
     std::ifstream file(Constants::SIGNATUREPATH+nameFile+".p7s", std::ios::binary);
     if (!file) {
         handleErrors("Sign not found, doc not valid!");

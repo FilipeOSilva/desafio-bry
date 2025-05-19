@@ -12,7 +12,7 @@ jobs:
         run: sudo apt update && sudo apt install -y cppcheck
 
       - name: Run cppcheck
-        run: cppcheck --enable=all --suppress=missingIncludeSystem -I include/ src/
+        run: cppcheck --enable=all --suppress=missingIncludeSystem --inline-suppr -I include/ src/
 
   build-image:
     runs-on: ubuntu-latest

@@ -16,6 +16,7 @@ using namespace Poco;
 using namespace Poco::Net;
 using namespace Poco::Util;
 
+// cppcheck-suppress unusedFunction
 void MultPartHandler::handlePart(const MessageHeader& header, std::istream& stream) {
     std::string contentDisposition = header.get("Content-Disposition", "");
     std::string dispositionValue;
@@ -36,6 +37,7 @@ void MultPartHandler::handlePart(const MessageHeader& header, std::istream& stre
     }
 }
 
+// cppcheck-suppress unusedFunction
 void SignatureHandler::handleRequest(HTTPServerRequest& request, HTTPServerResponse& response) {
     response.setContentType("application/json");
     std::ostream& out = response.send();
@@ -118,6 +120,7 @@ void NotFoundHandler::handleRequest(HTTPServerRequest& request, HTTPServerRespon
     Poco::JSON::Stringifier::stringify(json, out);
 }
 
+// cppcheck-suppress unusedFunction
 HTTPRequestHandler* SignVerifyRequestHandler::createRequestHandler(const HTTPServerRequest& request) {
     if (request.getURI() == Constants::ENDPOINT_SIGNATURE && request.getMethod() == HTTPRequest::HTTP_POST) {
         return new SignatureHandler;
