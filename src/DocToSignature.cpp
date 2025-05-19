@@ -13,24 +13,6 @@ void DocToSignature::handleErrors(const std::string& msg) {
     throw std::runtime_error(msg);
 }
 
-void DocToSignature::decodeBase64(const std::string& b64_input) {
-    BIO* bio = BIO_new_mem_buf(b64_input.data(), b64_input.length());
-    BIO* b64 = BIO_new(BIO_f_base64());
-    bio = BIO_push(b64, bio);
-    BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
-
-    docPKCS12.resize(b64_input.length());
-    int len = BIO_read(bio, docPKCS12.data(), docPKCS12.size());
-
-    if (len <= 0) {
-        BIO_free_all(bio);
-        throw std::runtime_error("Decoder base64 error.");
-    }
-
-    docPKCS12.resize(len);
-    BIO_free_all(bio);
-}
-
 std::string DocToSignature::sha512(const std::string& input) {
     unsigned char hash[SHA512_DIGEST_LENGTH];
     SHA512(reinterpret_cast<const unsigned char*>(input.c_str()), input.length(), hash);
@@ -116,7 +98,7 @@ void DocToSignature::signDoc() {
         handleErrors("Sign not possible.");
     }
 
-    std::string nameFile = sha512(docCMS.c_str());
+    std::string nameFile = sha512(docCMS);
 
     if (!std::filesystem::exists(Constants::SIGNATUREPATH)) {
         std::filesystem::create_directories(std::filesystem::path(Constants::SIGNATUREPATH).parent_path());
