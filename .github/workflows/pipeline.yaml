@@ -1,0 +1,39 @@
+name: Pipeline
+on: [push, pull_request]
+
+jobs:
+  static-cppcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install cppcheck
+        run: sudo apt update && sudo apt install -y cppcheck
+
+      - name: Run cppcheck
+        run: cppcheck --enable=all --suppress=missingIncludeSystem -I include/ src/
+
+  build-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/Checkout@v3
+
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Build CPP server
+        run: |
+          docker build -t container-server .
+          docker run -d --name temp-container container-server
+          docker cp temp-container:/app/build/server ./server
+          docker kill temp-container
+          docker rm temp-container
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-server-bin
+          path: server

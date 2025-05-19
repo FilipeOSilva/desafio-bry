@@ -1,3 +1,4 @@
+
 # Desafio prático - Desenvolvedor back-end C++
 O desafio consiste em trabalhar com documentos para serem assinados digitalmente.
 ## Cronograma
@@ -9,7 +10,7 @@ O desafio consiste em trabalhar com documentos para serem assinados digitalmente
 | Etapa 3 - Verificar a assinatura gerada | Criada Classe para validar a assinatura, aqui não consegui obter o "encapContentInfo". | Incompleta | Necessário criar Testes unitários, necessário validar melhor o motivo de o "elemento" encapContentInfo estar sem valor. |
 | Etapa 4 - API REST | Através da Biblioteca do POCO, criou-se um servidor HTTP, que responde os requests. | Concluído | Está com muitos dados de forma HARDCODE, necessário melhorar, ou ver uma estratégia para deixar isso de forma "melhor" para manutenção. |
 | Etapa 5 - Relatório das Atividades | Documentação escrita, com a forma de fazer o build, estudo de caso e pontos de melhoria. | Concluída | Necessário colocar itens referente a *pipelines* e ambientes de desenvolvimento. |
-| Etapa 6 (OPCIONAL) - Relatório das Atividades | | Não inicializado | |
+| Etapa 6 (OPCIONAL) - Relatório das Atividades | Criado o arquivo para CI/CD, com apenas a verificação simples de código estático e a construção de um executável| Concluída | Necessário produzir para outras versões e fazer "Job" para testes unitários. |
 ## Build do projeto
 Esse desafio foi feito pensando em Maquinas que tenham S.O. GNU/Linux, para isso clone o repositório, acesse a pasta do projeto e execute os seguintes comandos:
 ```
@@ -20,7 +21,7 @@ make
 ```
 **OBS**.: Podem correr falhas durante o Build, por falta de bibliotecas, sejam (openSSL e/ou POCO), para isso seria necessário instala-las, ou via Gerenciador de repositório ou baixando e compilando as ferramentas.
 ### Usando Dockerfile e Dockercompose
-Foram adicionados dois arquivos para podermos rodar a aplicação de forma "conterizada", que possibilita desacoplar do ambiente do usuário, garantindo que seja possível executar a aplicação. Para isso é necessário ter a ferramenta `docker`instalada na maquina. Para executar, esteja dentro na pasta do projeto e execute o comando:
+Foram adicionados dois arquivos para podermos rodar a aplicação de forma "conterizada", que possibilita desacoplar do ambiente do usuário, garantindo que seja possível executar a aplicação. Para isso é necessário ter a ferramenta `docker` instalada na maquina. Para executar, esteja dentro na pasta do projeto e execute o comando:
 ```
 docker-compose up -d
 ```
@@ -43,7 +44,7 @@ Para testar a aplicação é necessário:
 - Documento com informações do signatário;
 - Senha do documento com as informações do signatário;
 - Ter a aplicação compilada (ou acesso ao docker em execução);
-A seguir um exemplo utilizando `terminal` (com `bash`) e com as ferramentas `sed`,  `curl`,  `base64` e `jq`.
+A seguir um exemplo utilizando `terminal` (com `bash`) e com as ferramentas `sed`, `curl`, `base64` e `jq`.
 Para gerar o documento assinado:
 ```
 curl -F "document=@resources/arquivos/doc.txt" -F "pkcs12=@resources/pkcs12/certificado_teste_hub.pfx" -F "password=bry123456" http://localhost:8080/signature/ | jq .cms | sed 's/["]//g' | base64 -d > docRet.cms
@@ -117,6 +118,7 @@ openssl cms -cmsout -print -in doc.msg
 A partir desse ponto, bastou replicar o que foi feito aqui em **C++** que pode ser visto dentro do projeto.
 ## Implementação
 Para a implementação, usou-se a documentação das bibliotecas [openSSL]( https://docs.openssl.org/) e [POCO](https://pocoproject.org/). Além de buscas por exemplos na internet e [videos](https://www.youtube.com/watch?v=O1OaJmrRHrw&list=PLgBMtP0_D_afzNG7Zs2jr8FSoyeU4yqhi).
+Além disso, criou-se uma rotina via **GITHUB Actions** para o processo de CI/CD.
 ### Dificuldades e melhorias
 - Questões referentes a implementação, como não tenho experiencia com *C++* tentou-se aproximar de algo estruturado, poderia explorar melhor questões que o paradigma de *POO*.
 - Existem muitas coisas em **HARDCODE**, que poderia-se buscar estratégias melhores para isso, ou criar arquivos de configuração.
